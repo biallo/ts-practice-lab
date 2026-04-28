@@ -17,6 +17,7 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
+  overflow-x: hidden;
 }
 
 button {
@@ -112,6 +113,10 @@ button {
 .lesson-list {
   display: grid;
   gap: 8px;
+}
+
+.mobile-lesson-picker {
+  display: none;
 }
 
 .lesson-item {
@@ -378,6 +383,7 @@ h1 {
 .code-block {
   max-width: 100%;
   overflow: auto;
+  -webkit-overflow-scrolling: touch;
   border: 1px solid #263344;
   border-radius: 8px;
   background: #101828;
@@ -417,6 +423,7 @@ h1 {
 .code-editor {
   width: 100%;
   min-height: 260px;
+  max-width: 100%;
   resize: vertical;
   border: 1px solid #263344;
   border-radius: 8px;
@@ -459,12 +466,27 @@ h1 {
   }
 
   .sidebar {
+    position: sticky;
+    top: 0;
+    z-index: 10;
     border-right: 0;
     border-bottom: 1px solid #dce3ed;
+    gap: 16px;
   }
 
   .lesson-list {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    display: flex;
+    margin: 0 -24px;
+    overflow-x: auto;
+    padding: 0 24px 4px;
+    scroll-padding: 24px;
+    scroll-snap-type: x proximity;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .lesson-item {
+    flex: 0 0 260px;
+    scroll-snap-align: start;
   }
 
   .workspace {
@@ -477,24 +499,174 @@ h1 {
 }
 
 @media (max-width: 680px) {
-  .sidebar,
-  .workspace {
-    padding: 18px;
+  body {
+    font-size: 17px;
   }
 
-  .lesson-list,
+  .sidebar,
+  .workspace {
+    padding: 16px;
+  }
+
+  .sidebar {
+    gap: 12px;
+    position: static;
+  }
+
+  .brand {
+    grid-template-columns: 44px minmax(0, 1fr);
+  }
+
+  .brand-mark {
+    width: 44px;
+    height: 44px;
+  }
+
+  .brand p {
+    font-size: 19px;
+  }
+
+  .brand span {
+    font-size: 14px;
+  }
+
+  .progress-block {
+    padding: 14px;
+  }
+
+  .progress-row {
+    font-size: 15px;
+  }
+
+  .progress-block p {
+    font-size: 14px;
+  }
+
+  .mobile-lesson-picker {
+    display: grid;
+    gap: 8px;
+  }
+
+  .mobile-lesson-picker span {
+    color: #344054;
+    font-size: 14px;
+    font-weight: 900;
+  }
+
+  .mobile-lesson-picker select {
+    width: 100%;
+    min-height: 48px;
+    border: 1px solid #96c9c5;
+    border-radius: 8px;
+    background: #edf8f7;
+    color: #153f3c;
+    padding: 0 12px;
+    font: inherit;
+    font-weight: 800;
+  }
+
+  .lesson-list {
+    display: none;
+  }
+
+  .workspace {
+    padding-top: 20px;
+  }
+
   .content-grid {
     grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .hero-panel {
+    gap: 18px;
+    padding-bottom: 20px;
   }
 
   h1 {
-    font-size: 28px;
+    font-size: 31px;
+    line-height: 1.12;
   }
 
-  .hero-actions,
+  .hero-panel p {
+    margin-top: 10px;
+    font-size: 17px;
+    line-height: 1.62;
+  }
+
+  .eyebrow {
+    font-size: 14px;
+  }
+
+  .tabs {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+    margin: 20px 0;
+  }
+
+  .tab {
+    min-width: 0;
+    min-height: 48px;
+    padding: 0 6px;
+    font-size: 16px;
+  }
+
+  .panel {
+    padding: 18px;
+  }
+
+  .panel.compact {
+    padding: 18px;
+  }
+
+  .panel-title {
+    margin-bottom: 12px;
+  }
+
+  .panel-title h2 {
+    font-size: 20px;
+  }
+
+  .concept-list,
+  .checklist {
+    gap: 14px;
+  }
+
+  .concept-list li,
+  .checklist li,
+  .panel p,
+  .lead {
+    font-size: 17px;
+    line-height: 1.7;
+  }
+
+  .code-block,
+  .code-editor {
+    padding: 14px;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .editor-wrap span {
+    font-size: 15px;
+  }
+
+  .code-editor {
+    min-height: 320px;
+  }
+
+  .hero-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
+  }
+
   .hero-actions button,
   .primary,
   .secondary {
     width: 100%;
+    min-height: 48px;
+    font-size: 16px;
   }
 }

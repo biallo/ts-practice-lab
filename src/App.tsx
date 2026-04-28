@@ -124,6 +124,25 @@ function App() {
           <p>{completedCount} / {lessons.length} 个主题完成</p>
         </div>
 
+        <label className="mobile-lesson-picker">
+          <span>当前课程</span>
+          <select
+            onChange={(event) => {
+              const lesson = lessons.find((item) => item.id === event.target.value);
+              if (lesson) {
+                selectLesson(lesson);
+              }
+            }}
+            value={activeLesson.id}
+          >
+            {lessons.map((lesson, index) => (
+              <option key={lesson.id} value={lesson.id}>
+                {String(index + 1).padStart(2, "0")} · {lesson.title}
+              </option>
+            ))}
+          </select>
+        </label>
+
         <nav className="lesson-list">
           {lessons.map((lesson, index) => (
             <button
