@@ -8,6 +8,10 @@
 - 可以标记完成并追踪进度
 - 刷新或重启后会恢复上次学习位置和代码草稿
 
+## 在线预览
+
+https://biallo.github.io/ts-practice-lab/
+
 ## 运行
 
 ```bash
