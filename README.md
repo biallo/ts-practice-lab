@@ -35,6 +35,14 @@ npm run dev
 12. satisfies 操作符
 13. React children 和组件类型
 14. tsconfig 和 strict 模式
+15. 条件类型
+16. infer 推断
+17. 映射类型 mapped types
+18. 深入内置工具类型
+19. Discriminated Union 可辨识联合
+20. React 事件和表单类型
+21. 类型安全的配置对象
+22. API 与错误响应建模
 
 ## 你可以继续扩展
 

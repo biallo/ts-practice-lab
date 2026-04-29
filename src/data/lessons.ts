@@ -986,5 +986,547 @@ function greet(user: User | null) {
       "知道 noImplicitAny 解决什么问题",
       "知道 strictNullChecks 为什么重要"
     ]
+  },
+  {
+    id: "conditional-types",
+    title: "条件类型",
+    difficulty: "进阶",
+    minutes: 30,
+    goal: "用 T extends U ? X : Y 根据类型条件生成新类型。",
+    concept: [
+      "条件类型的形式是 T extends U ? TrueType : FalseType。",
+      "它不是运行时 if，而是在类型层面根据 T 是否满足 U 来选择结果。",
+      "条件类型常用于工具类型、API 类型转换、根据输入类型推导输出类型。"
+    ],
+    jsThinking:
+      "JS 里根据值做 if 判断，运行时决定走哪个分支。",
+    tsThinking:
+      "TS 可以根据类型做条件判断，让类型本身也能表达分支逻辑。",
+    example: `type IsString<T> = T extends string ? true : false;
+
+type A = IsString<"hello">;
+type B = IsString<number>;
+
+type MessageOf<T> = T extends { message: string } ? string : never;`,
+    exercise: {
+      prompt: "写一个 ToArray<T>：如果 T 已经是数组就保持原样，否则包成数组。",
+      starter: `type ToArray<T> = unknown;
+
+type A = ToArray<string>;
+type B = ToArray<number[]>;`,
+      answer: `type ToArray<T> = T extends unknown[] ? T : T[];
+
+type A = ToArray<string>;
+type B = ToArray<number[]>;`,
+      explanation:
+        "T extends unknown[] 用来判断 T 是否是数组类型。string 会变成 string[]，number[] 已经是数组，所以保持 number[]。"
+    },
+    debugCase: {
+      title: "条件类型不是运行时判断",
+      broken: `type IsNumber<T> = T === number ? true : false;`,
+      fixed: `type IsNumber<T> = T extends number ? true : false;`,
+      reason:
+        "类型层面不能使用 ===。条件类型使用 extends 判断 T 是否能赋值给目标类型。"
+    },
+    checklist: [
+      "能读懂 T extends U ? X : Y",
+      "知道条件类型发生在类型层面",
+      "能写一个简单的条件工具类型"
+    ]
+  },
+  {
+    id: "infer-types",
+    title: "infer 推断",
+    difficulty: "进阶",
+    minutes: 30,
+    goal: "在条件类型里用 infer 从已有类型中提取局部类型。",
+    concept: [
+      "infer 只能出现在条件类型的 extends 分支中。",
+      "它像是在类型匹配时声明一个临时类型变量。",
+      "ReturnType、Parameters 这类工具类型背后都用到了类似思路。"
+    ],
+    jsThinking:
+      "JS 里可以从数组或函数结果里拿值，但类型信息不会自动被提取出来。",
+    tsThinking:
+      "TS 可以从数组、Promise、函数类型里推断出内部类型，再拿去组合新类型。",
+    example: `type ArrayItem<T> = T extends Array<infer Item> ? Item : never;
+
+type User = { id: number; name: string };
+type UserItem = ArrayItem<User[]>;
+
+type PromiseValue<T> = T extends Promise<infer Value> ? Value : T;`,
+    exercise: {
+      prompt: "写一个 GetPromiseValue<T>，提取 Promise 里的值类型。",
+      starter: `type GetPromiseValue<T> = unknown;
+
+type User = {
+  id: number;
+};
+
+type Result = GetPromiseValue<Promise<User>>;`,
+      answer: `type GetPromiseValue<T> = T extends Promise<infer Value> ? Value : T;
+
+type User = {
+  id: number;
+};
+
+type Result = GetPromiseValue<Promise<User>>;`,
+      explanation:
+        "Promise<infer Value> 会在匹配 Promise 时把内部类型命名为 Value。Promise<User> 的 Value 就是 User。"
+    },
+    debugCase: {
+      title: "infer 不能随便独立使用",
+      broken: `type Item = infer T;`,
+      fixed: `type ItemOf<T> = T extends Array<infer Item> ? Item : never;`,
+      reason:
+        "infer 必须放在条件类型的 extends 匹配结构里，用来从被匹配的类型中提取某一部分。"
+    },
+    checklist: [
+      "知道 infer 是类型层面的临时变量",
+      "能从数组类型中提取元素类型",
+      "能从 Promise 类型中提取 resolved value 类型"
+    ]
+  },
+  {
+    id: "mapped-types",
+    title: "映射类型 mapped types",
+    difficulty: "进阶",
+    minutes: 30,
+    goal: "用 [K in keyof T] 批量转换对象类型的属性。",
+    concept: [
+      "映射类型会遍历 key union，并为每个 key 生成新属性。",
+      "[K in keyof T] 是很多工具类型的基础写法。",
+      "可以在映射时添加或移除 readonly、? 等修饰符。"
+    ],
+    jsThinking:
+      "JS 里可以遍历对象 key 生成新对象。",
+    tsThinking:
+      "TS 也能在类型层面遍历对象 key，生成新的对象类型。",
+    example: `type MyPartial<T> = {
+  [K in keyof T]?: T[K];
+};
+
+type User = {
+  id: number;
+  name: string;
+};
+
+type UserPatch = MyPartial<User>;`,
+    exercise: {
+      prompt: "写一个 ReadonlyCopy<T>，让对象所有属性都变成 readonly。",
+      starter: `type ReadonlyCopy<T> = unknown;
+
+type Todo = {
+  id: number;
+  title: string;
+};
+
+type ReadonlyTodo = ReadonlyCopy<Todo>;`,
+      answer: `type ReadonlyCopy<T> = {
+  readonly [K in keyof T]: T[K];
+};
+
+type Todo = {
+  id: number;
+  title: string;
+};
+
+type ReadonlyTodo = ReadonlyCopy<Todo>;`,
+      explanation:
+        "[K in keyof T] 会遍历 T 的每个字段，readonly 修饰符会让生成出来的字段不可重新赋值。"
+    },
+    debugCase: {
+      title: "映射类型要遍历 key，不是遍历 value",
+      broken: `type OptionalValues<T> = {
+  [K in T]?: T[K];
+};`,
+      fixed: `type OptionalValues<T> = {
+  [K in keyof T]?: T[K];
+};`,
+      reason:
+        "K 需要是一组属性名，所以要用 keyof T。T 本身是整个对象类型，不能直接拿来当 key union。"
+    },
+    checklist: [
+      "能读懂 [K in keyof T]",
+      "能用 T[K] 保留原字段类型",
+      "能写出简单的 Partial 或 Readonly"
+    ]
+  },
+  {
+    id: "utility-types-deep",
+    title: "深入内置工具类型",
+    difficulty: "进阶",
+    minutes: 30,
+    goal: "熟悉项目中高频出现的 Partial、Required、Pick、Omit、ReturnType、Parameters。",
+    concept: [
+      "工具类型是 TS 已经帮你写好的类型转换函数。",
+      "Pick 和 Omit 用于从对象类型里选择或排除字段。",
+      "ReturnType 和 Parameters 可以从函数类型里提取返回值和参数列表。"
+    ],
+    jsThinking:
+      "JS 里复用对象结构时，经常手动复制字段或靠注释说明差异。",
+    tsThinking:
+      "TS 可以基于已有类型派生新类型，减少重复并保持同步。",
+    example: `type User = {
+  id: number;
+  name: string;
+  email: string;
+};
+
+type UserPreview = Pick<User, "id" | "name">;
+type UserForm = Omit<User, "id">;
+type UserPatch = Partial<UserForm>;`,
+    exercise: {
+      prompt: "从 User 类型派生 CreateUserInput 和 UpdateUserInput。",
+      starter: `type User = {
+  id: number;
+  name: string;
+  email: string;
+  role: "admin" | "member";
+};
+
+type CreateUserInput = unknown;
+type UpdateUserInput = unknown;`,
+      answer: `type User = {
+  id: number;
+  name: string;
+  email: string;
+  role: "admin" | "member";
+};
+
+type CreateUserInput = Omit<User, "id">;
+type UpdateUserInput = Partial<CreateUserInput>;`,
+      explanation:
+        "创建用户时通常还没有 id，所以用 Omit<User, \"id\">。更新用户时只提交变化字段，所以用 Partial<CreateUserInput>。"
+    },
+    debugCase: {
+      title: "Pick 的第二个参数必须是已有 key",
+      broken: `type User = {
+  id: number;
+  name: string;
+};
+
+type UserPreview = Pick<User, "id" | "email">;`,
+      fixed: `type User = {
+  id: number;
+  name: string;
+};
+
+type UserPreview = Pick<User, "id" | "name">;`,
+      reason:
+        "Pick<User, K> 中的 K 必须来自 keyof User。User 没有 email 字段，所以不能选择 email。"
+    },
+    checklist: [
+      "能用 Pick 和 Omit 派生对象类型",
+      "能用 Partial 表达局部更新",
+      "知道 ReturnType 和 Parameters 用来提取函数信息"
+    ]
+  },
+  {
+    id: "discriminated-unions",
+    title: "Discriminated Union 可辨识联合",
+    difficulty: "进阶",
+    minutes: 30,
+    goal: "用统一的状态字段建模复杂 UI 和业务状态。",
+    concept: [
+      "可辨识联合通常有一个共同字段，比如 status、type、kind。",
+      "每个分支根据这个字段携带不同数据。",
+      "switch 搭配 never 可以检查是否漏处理状态。"
+    ],
+    jsThinking:
+      "JS 状态对象常常混着 data、error、loading，字段是否存在要靠约定。",
+    tsThinking:
+      "TS 可以让每种状态拥有独立形状，只有对应分支才能访问对应数据。",
+    example: `type LoadState<T> =
+  | { status: "idle" }
+  | { status: "loading" }
+  | { status: "success"; data: T }
+  | { status: "error"; message: string };
+
+function getMessage(state: LoadState<string[]>) {
+  switch (state.status) {
+    case "success":
+      return state.data.join(", ");
+    case "error":
+      return state.message;
+    default:
+      return "等待中";
+  }
+}`,
+    exercise: {
+      prompt: "把表单状态建模为 discriminated union，并在成功分支读取 userId。",
+      starter: `type SubmitState = unknown;
+
+function getSubmitText(state: SubmitState) {
+  if (state.status === "success") {
+    return state.userId;
+  }
+
+  return state.status;
+}`,
+      answer: `type SubmitState =
+  | { status: "idle" }
+  | { status: "submitting" }
+  | { status: "success"; userId: number }
+  | { status: "error"; message: string };
+
+function getSubmitText(state: SubmitState) {
+  if (state.status === "success") {
+    return String(state.userId);
+  }
+
+  return state.status;
+}`,
+      explanation:
+        "status 是共同辨识字段。判断 status === \"success\" 后，TS 知道这个分支一定有 userId。"
+    },
+    debugCase: {
+      title: "不要把所有字段都做成可选",
+      broken: `type RequestState = {
+  status: "loading" | "success" | "error";
+  data?: string[];
+  message?: string;
+};
+
+function render(state: RequestState) {
+  if (state.status === "success") {
+    return state.data.join(", ");
+  }
+}`,
+      fixed: `type RequestState =
+  | { status: "loading" }
+  | { status: "success"; data: string[] }
+  | { status: "error"; message: string };
+
+function render(state: RequestState) {
+  if (state.status === "success") {
+    return state.data.join(", ");
+  }
+
+  return "";
+}`,
+      reason:
+        "把 data 和 message 都设成可选会让 TS 认为 success 时 data 仍可能不存在。分支对象能表达更准确的状态关系。"
+    },
+    checklist: [
+      "能设计共同辨识字段",
+      "能在分支中访问对应数据",
+      "知道可选字段不等于状态建模"
+    ]
+  },
+  {
+    id: "react-events-forms",
+    title: "React 事件和表单类型",
+    difficulty: "常用",
+    minutes: 30,
+    goal: "掌握 input、form、select、textarea 的常见事件类型。",
+    concept: [
+      "input onChange 常用 React.ChangeEvent<HTMLInputElement>。",
+      "form onSubmit 常用 React.FormEvent<HTMLFormElement>。",
+      "不同元素要写不同的 HTMLElement 类型，比如 HTMLSelectElement、HTMLTextAreaElement。"
+    ],
+    jsThinking:
+      "JS 里 event.target.value 能跑就行，但 target 到底是什么元素不明确。",
+    tsThinking:
+      "TS 里事件类型会告诉你 target/currentTarget 上有哪些安全可用的属性。",
+    example: `function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  event.preventDefault();
+}
+
+function handleEmailChange(event: React.ChangeEvent<HTMLInputElement>) {
+  console.log(event.target.value);
+}
+
+function handleRoleChange(event: React.ChangeEvent<HTMLSelectElement>) {
+  console.log(event.target.value);
+}`,
+    exercise: {
+      prompt: "给表单提交和 textarea 输入事件补类型。",
+      starter: `function handleSubmit(event) {
+  event.preventDefault();
+}
+
+function handleBioChange(event) {
+  return event.target.value.trim();
+}`,
+      answer: `function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  event.preventDefault();
+}
+
+function handleBioChange(event: React.ChangeEvent<HTMLTextAreaElement>) {
+  return event.target.value.trim();
+}`,
+      explanation:
+        "表单提交事件对应 HTMLFormElement。textarea 的输入变化对应 HTMLTextAreaElement，这样 target.value 就是安全的 string。"
+    },
+    debugCase: {
+      title: "select 事件不要写成 input 元素",
+      broken: `function handleRoleChange(event: React.ChangeEvent<HTMLInputElement>) {
+  return event.target.value;
+}`,
+      fixed: `function handleRoleChange(event: React.ChangeEvent<HTMLSelectElement>) {
+  return event.target.value;
+}`,
+      reason:
+        "select 和 input 是不同 DOM 元素。虽然都有 value，但事件类型应匹配实际元素，后续访问 selectedOptions 等属性时才准确。"
+    },
+    checklist: [
+      "能写 input change 事件类型",
+      "能写 form submit 事件类型",
+      "能区分 input、select、textarea 的元素类型"
+    ]
+  },
+  {
+    id: "typed-config-objects",
+    title: "类型安全的配置对象",
+    difficulty: "进阶",
+    minutes: 30,
+    goal: "组合 as const、keyof typeof、Record、satisfies 写出安全配置表。",
+    concept: [
+      "配置对象通常既是运行时数据，也是类型来源。",
+      "keyof typeof config 可以从对象 key 生成 union。",
+      "satisfies 可以校验配置结构，同时保留字面量类型。"
+    ],
+    jsThinking:
+      "JS 配置表写起来方便，但 key 写错或漏配置不容易提前发现。",
+    tsThinking:
+      "TS 可以让配置对象成为单一事实来源，既驱动页面，也生成类型约束。",
+    example: `const tabConfig = {
+  home: { label: "首页", path: "/" },
+  settings: { label: "设置", path: "/settings" },
+  profile: { label: "个人中心", path: "/profile" }
+} as const;
+
+type TabId = keyof typeof tabConfig;`,
+    exercise: {
+      prompt: "用 satisfies 校验每个 tab 都有 label 和 path，并推导 TabId。",
+      starter: `const tabs = {
+  home: { label: "首页", path: "/" },
+  settings: { label: "设置", path: "/settings" }
+};
+
+type TabId = string;`,
+      answer: `const tabs = {
+  home: { label: "首页", path: "/" },
+  settings: { label: "设置", path: "/settings" }
+} satisfies Record<string, { label: string; path: string }>;
+
+type TabId = keyof typeof tabs;`,
+      explanation:
+        "satisfies 会检查每个配置项都有 label 和 path。keyof typeof tabs 会得到 \"home\" | \"settings\"。"
+    },
+    debugCase: {
+      title: "只写 Record<string, ...> 会丢失具体 key",
+      broken: `const routes: Record<string, { path: string }> = {
+  home: { path: "/" },
+  settings: { path: "/settings" }
+};
+
+type RouteId = keyof typeof routes;`,
+      fixed: `const routes = {
+  home: { path: "/" },
+  settings: { path: "/settings" }
+} satisfies Record<string, { path: string }>;
+
+type RouteId = keyof typeof routes;`,
+      reason:
+        "显式标成 Record<string, ...> 后，keyof 只会得到 string。用 satisfies 可以校验 value 结构，同时保留具体 key。"
+    },
+    checklist: [
+      "能用 keyof typeof 从对象生成 key union",
+      "能用 satisfies 校验配置项结构",
+      "知道什么时候避免把对象直接标成 Record<string, ...>"
+    ]
+  },
+  {
+    id: "api-error-modeling",
+    title: "API 与错误响应建模",
+    difficulty: "进阶",
+    minutes: 35,
+    goal: "用泛型和 discriminated union 同时建模成功响应和失败响应。",
+    concept: [
+      "真实接口通常有成功和失败两种结构。",
+      "ApiResult<T> 可以让成功分支携带 T，失败分支携带错误信息。",
+      "调用方判断 ok 后，TS 会自动收窄到成功或失败分支。"
+    ],
+    jsThinking:
+      "JS 里常常假设接口成功，然后在运行时遇到 error 才补判断。",
+    tsThinking:
+      "TS 可以把成功和失败都写进类型里，逼迫调用方处理两种结果。",
+    example: `type ApiResult<T> =
+  | { ok: true; data: T }
+  | { ok: false; error: { code: string; message: string } };
+
+type User = {
+  id: number;
+  name: string;
+};
+
+function renderUser(result: ApiResult<User>) {
+  if (result.ok) {
+    return result.data.name;
+  }
+
+  return result.error.message;
+}`,
+    exercise: {
+      prompt: "把 getUserName 改成先判断 ok，再安全读取 data 或 error。",
+      starter: `type ApiResult<T> =
+  | { ok: true; data: T }
+  | { ok: false; error: string };
+
+type User = {
+  name: string;
+};
+
+function getUserName(result: ApiResult<User>) {
+  return result.data.name;
+}`,
+      answer: `type ApiResult<T> =
+  | { ok: true; data: T }
+  | { ok: false; error: string };
+
+type User = {
+  name: string;
+};
+
+function getUserName(result: ApiResult<User>) {
+  if (result.ok) {
+    return result.data.name;
+  }
+
+  return result.error;
+}`,
+      explanation:
+        "ApiResult<User> 不保证一定成功。判断 result.ok 后，true 分支里有 data，false 分支里有 error。"
+    },
+    debugCase: {
+      title: "错误分支没有 data",
+      broken: `type ApiResult<T> =
+  | { ok: true; data: T }
+  | { ok: false; error: string };
+
+function readData<T>(result: ApiResult<T>) {
+  return result.data;
+}`,
+      fixed: `type ApiResult<T> =
+  | { ok: true; data: T }
+  | { ok: false; error: string };
+
+function readData<T>(result: ApiResult<T>) {
+  if (result.ok) {
+    return result.data;
+  }
+
+  throw new Error(result.error);
+}`,
+      reason:
+        "只有 ok: true 的分支才有 data。失败分支必须单独处理，否则调用方会误以为所有结果都有数据。"
+    },
+    checklist: [
+      "能写出 ApiResult<T>",
+      "能通过 ok 字段收窄成功和失败分支",
+      "能为接口错误设计明确类型"
+    ]
   }
 ];
