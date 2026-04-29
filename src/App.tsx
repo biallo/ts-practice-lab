@@ -9,7 +9,7 @@ import {
   RotateCcw,
   Wrench
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { lessons } from "./data/lessons";
 import type { Lesson } from "./data/lessons";
@@ -35,6 +35,7 @@ const STORAGE_KEYS = {
 } as const;
 
 function App() {
+  const workspaceRef = useRef<HTMLElement>(null);
   const [activeLessonId, setActiveLessonId] = useState(loadActiveLessonId);
   const [activeTab, setActiveTab] = useState<TabId>(loadActiveTab);
   const [showAnswer, setShowAnswer] = useState(false);
@@ -69,6 +70,7 @@ function App() {
     setShowFix(false);
     setPracticeResult("");
     setDebugResult("");
+    scrollWorkspaceToTop(workspaceRef.current);
   };
 
   const markDone = () => {
@@ -162,7 +164,7 @@ function App() {
         </nav>
       </aside>
 
-      <section className="workspace">
+      <section className="workspace" ref={workspaceRef}>
         <header className="hero-panel">
           <div>
             <span className="eyebrow">{activeLesson.difficulty} · {currentStatus}</span>
@@ -490,6 +492,21 @@ function CodeEditor({
 
 function normalizeCode(code: string) {
   return code.replace(/\s+/g, "");
+}
+
+function scrollWorkspaceToTop(workspace: HTMLElement | null) {
+  if (!workspace) {
+    return;
+  }
+
+  requestAnimationFrame(() => {
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    workspace.scrollIntoView({
+      block: "start",
+      behavior: prefersReducedMotion ? "auto" : "smooth"
+    });
+  });
 }
 
 function loadActiveLessonId() {
