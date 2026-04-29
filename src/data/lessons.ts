@@ -1830,19 +1830,19 @@ const count = parseValue(2);`,
     return value.trim();
   }
 
-  return value.toFixed(2);
+  return Number(value.toFixed(2));
 }`,
       answer: `function formatInput(value: string): string;
-function formatInput(value: number): string;
+function formatInput(value: number): number;
 function formatInput(value: string | number) {
   if (typeof value === "string") {
     return value.trim();
   }
 
-  return value.toFixed(2);
+  return Number(value.toFixed(2));
 }`,
       explanation:
-        "这里 number 调用最终返回 toFixed 的结果，所以返回类型是 string。重载让调用方能得到精确返回值。"
+        "toFixed 会返回 string。如果题目要求 number 分支仍返回 number，就要用 Number(...) 转回数字。重载让调用方能得到精确返回值。"
     },
     debugCase: {
       title: "实现签名要覆盖所有重载参数",
