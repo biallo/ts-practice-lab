@@ -1528,5 +1528,687 @@ function readData<T>(result: ApiResult<T>) {
       "能通过 ok 字段收窄成功和失败分支",
       "能为接口错误设计明确类型"
     ]
+  },
+  {
+    id: "template-literal-types",
+    title: "模板字面量类型",
+    difficulty: "进阶",
+    minutes: 30,
+    goal: "用字符串拼接能力在类型层面生成更精确的字符串 union。",
+    concept: [
+      "模板字面量类型使用和 JS 模板字符串类似的语法，但它发生在类型层面。",
+      "它可以把多个字符串 union 组合成新的字符串 union。",
+      "常见用途包括事件名、路由名、CSS token、对象字段派生命名。"
+    ],
+    jsThinking:
+      "JS 里可以运行时拼接字符串，但拼错事件名或 key 通常要运行后才发现。",
+    tsThinking:
+      "TS 可以在类型层面拼接字符串，让合法字符串集合提前变成可检查的类型。",
+    example: `type Field = "name" | "email";
+type EventName = \`\${Field}Changed\`;
+
+const event: EventName = "nameChanged";
+
+type Size = "sm" | "md" | "lg";
+type ButtonClass = \`button-\${Size}\`;`,
+    exercise: {
+      prompt: "用模板字面量类型生成 route:home、route:settings、route:profile。",
+      starter: `type Page = "home" | "settings" | "profile";
+
+type RouteEvent = string;`,
+      answer: `type Page = "home" | "settings" | "profile";
+
+type RouteEvent = \`route:\${Page}\`;`,
+      explanation:
+        "模板字面量类型会把 Page 的每个成员放进字符串模板里，得到 \"route:home\" | \"route:settings\" | \"route:profile\"。"
+    },
+    debugCase: {
+      title: "模板字面量类型只能拼接可转换成字符串的类型",
+      broken: `type User = {
+  id: number;
+};
+
+type UserEvent = \`\${User}Changed\`;`,
+      fixed: `type Field = "id" | "name";
+
+type UserEvent = \`\${Field}Changed\`;`,
+      reason:
+        "模板字面量类型适合拼接 string、number、boolean、bigint、null、undefined 等字面量类型，不适合直接拼接对象类型。"
+    },
+    checklist: [
+      "能读懂 `prefix:${Union}` 这种类型写法",
+      "能用模板字面量类型生成字符串 union",
+      "知道它是类型层面的字符串组合"
+    ]
+  },
+  {
+    id: "key-remapping",
+    title: "Key remapping 键名重映射",
+    difficulty: "进阶",
+    minutes: 35,
+    goal: "在映射类型中用 as 改写对象 key，生成新对象类型。",
+    concept: [
+      "键名重映射写在 mapped type 的 as 后面。",
+      "它常和模板字面量类型、Capitalize、Exclude 一起使用。",
+      "可以把字段变成 getX 方法，也可以过滤掉不需要的字段。"
+    ],
+    jsThinking:
+      "JS 里可以遍历对象生成一组新 key。",
+    tsThinking:
+      "TS 可以在类型层面遍历对象 key，并把 key 改造成新的命名规则。",
+    example: `type Getters<T> = {
+  [K in keyof T as \`get\${Capitalize<string & K>}\`]: () => T[K];
+};
+
+type User = {
+  name: string;
+  age: number;
+};
+
+type UserGetters = Getters<User>;`,
+    exercise: {
+      prompt: "把对象字段生成 onXChange 回调 props。",
+      starter: `type ChangeHandlers<T> = unknown;
+
+type Form = {
+  name: string;
+  age: number;
+};`,
+      answer: `type ChangeHandlers<T> = {
+  [K in keyof T as \`on\${Capitalize<string & K>}Change\`]: (value: T[K]) => void;
+};
+
+type Form = {
+  name: string;
+  age: number;
+};`,
+      explanation:
+        "K 遍历原字段，as 后面生成新的 key。T[K] 让每个回调的 value 类型仍然对应原字段。"
+    },
+    debugCase: {
+      title: "Capitalize 需要字符串类型",
+      broken: `type Getters<T> = {
+  [K in keyof T as \`get\${Capitalize<K>}\`]: () => T[K];
+};`,
+      fixed: `type Getters<T> = {
+  [K in keyof T as \`get\${Capitalize<string & K>}\`]: () => T[K];
+};`,
+      reason:
+        "keyof T 可能包含 string、number、symbol。Capitalize 只能处理 string，所以常用 string & K 把 key 限制到字符串部分。"
+    },
+    checklist: [
+      "能读懂 [K in keyof T as NewKey]",
+      "能用模板字面量生成新 key",
+      "知道 string & K 的作用"
+    ]
+  },
+  {
+    id: "recursive-types",
+    title: "递归类型",
+    difficulty: "进阶",
+    minutes: 30,
+    goal: "描述树、菜单、评论、多层 JSON 这类自引用数据结构。",
+    concept: [
+      "递归类型是在类型定义里引用自己。",
+      "它适合描述树结构、嵌套导航、文件目录、评论回复等数据。",
+      "写递归工具类型时要有终止条件，否则类型会过深或失控。"
+    ],
+    jsThinking:
+      "JS 里树结构通常就是对象里再放 children 数组。",
+    tsThinking:
+      "TS 可以把这种自引用结构显式写出来，让每一层 children 都有同样约束。"
+    ,
+    example: `type TreeNode = {
+  id: string;
+  label: string;
+  children?: TreeNode[];
+};
+
+const menu: TreeNode = {
+  id: "docs",
+  label: "文档",
+  children: [{ id: "intro", label: "介绍" }]
+};`,
+    exercise: {
+      prompt: "给评论树 CommentNode 补上递归 replies 类型。",
+      starter: `type CommentNode = {
+  id: string;
+  body: string;
+  replies?: unknown;
+};`,
+      answer: `type CommentNode = {
+  id: string;
+  body: string;
+  replies?: CommentNode[];
+};`,
+      explanation:
+        "每条回复本身还是一条评论，所以 replies 应该是 CommentNode[]。这就是最常见的递归对象类型。"
+    },
+    debugCase: {
+      title: "递归数组别忘了元素类型",
+      broken: `type MenuItem = {
+  label: string;
+  children?: [];
+};`,
+      fixed: `type MenuItem = {
+  label: string;
+  children?: MenuItem[];
+};`,
+      reason:
+        "children?: [] 表示只能是空元组，不能放子菜单。children?: MenuItem[] 才表示每个子项也是菜单项。"
+    },
+    checklist: [
+      "能写出自引用对象类型",
+      "能描述树形 children 数据",
+      "知道递归工具类型需要终止条件"
+    ]
+  },
+  {
+    id: "deep-utility-types",
+    title: "深度工具类型",
+    difficulty: "进阶",
+    minutes: 35,
+    goal: "写出 DeepPartial、DeepReadonly 这类递归转换对象的类型。",
+    concept: [
+      "浅层 Partial 只影响第一层字段，深度工具类型会递归处理嵌套对象。",
+      "递归工具类型通常用条件类型判断是否继续深入。",
+      "数组和函数要谨慎处理，不同项目会有不同取舍。"
+    ],
+    jsThinking:
+      "JS 里深层配置对象经常只改其中一小块。",
+    tsThinking:
+      "TS 可以让嵌套对象的每一层都变成可选或只读，贴近真实更新场景。",
+    example: `type DeepPartial<T> = {
+  [K in keyof T]?: T[K] extends object ? DeepPartial<T[K]> : T[K];
+};
+
+type Settings = {
+  user: {
+    profile: {
+      name: string;
+    };
+  };
+};
+
+type SettingsPatch = DeepPartial<Settings>;`,
+    exercise: {
+      prompt: "写一个 DeepReadonly<T>，让嵌套对象字段也 readonly。",
+      starter: `type DeepReadonly<T> = unknown;
+
+type Config = {
+  theme: {
+    mode: "light" | "dark";
+  };
+};`,
+      answer: `type DeepReadonly<T> = {
+  readonly [K in keyof T]: T[K] extends object ? DeepReadonly<T[K]> : T[K];
+};
+
+type Config = {
+  theme: {
+    mode: "light" | "dark";
+  };
+};`,
+      explanation:
+        "先给当前层每个字段加 readonly。如果字段值还是 object，就递归应用 DeepReadonly。"
+    },
+    debugCase: {
+      title: "Partial 只会影响第一层",
+      broken: `type Settings = {
+  profile: {
+    name: string;
+    email: string;
+  };
+};
+
+type Patch = Partial<Settings>;
+
+const patch: Patch = {
+  profile: {
+    name: "Ada"
+  }
+};`,
+      fixed: `type DeepPartial<T> = {
+  [K in keyof T]?: T[K] extends object ? DeepPartial<T[K]> : T[K];
+};
+
+type Settings = {
+  profile: {
+    name: string;
+    email: string;
+  };
+};
+
+type Patch = DeepPartial<Settings>;
+
+const patch: Patch = {
+  profile: {
+    name: "Ada"
+  }
+};`,
+      reason:
+        "Partial<Settings> 只让 profile 可选，但一旦提供 profile，它里面的 name 和 email 仍按原类型要求。DeepPartial 会继续处理嵌套字段。"
+    },
+    checklist: [
+      "知道浅层工具类型和深度工具类型的区别",
+      "能用条件类型控制是否递归",
+      "能写出简化版 DeepPartial 或 DeepReadonly"
+    ]
+  },
+  {
+    id: "function-overloads",
+    title: "函数重载 overload",
+    difficulty: "进阶",
+    minutes: 30,
+    goal: "让一个函数根据不同参数形式返回不同的精确类型。",
+    concept: [
+      "函数重载由多个重载签名和一个实现签名组成。",
+      "调用方只能看到重载签名，函数体使用实现签名。",
+      "当返回类型取决于参数组合时，重载比宽泛 union 更清晰。"
+    ],
+    jsThinking:
+      "JS 里一个函数可以接 string 或 number，然后运行时判断。",
+    tsThinking:
+      "TS 可以把不同调用方式分别声明出来，让返回值类型跟着参数变化。"
+    ,
+    example: `function parseValue(value: string): string[];
+function parseValue(value: number): number;
+function parseValue(value: string | number) {
+  if (typeof value === "string") {
+    return value.split(",");
+  }
+
+  return value * 2;
+}
+
+const tags = parseValue("a,b");
+const count = parseValue(2);`,
+    exercise: {
+      prompt: "给 formatInput 添加重载：string 返回 string，number 返回 number。",
+      starter: `function formatInput(value: string | number) {
+  if (typeof value === "string") {
+    return value.trim();
+  }
+
+  return value.toFixed(2);
+}`,
+      answer: `function formatInput(value: string): string;
+function formatInput(value: number): string;
+function formatInput(value: string | number) {
+  if (typeof value === "string") {
+    return value.trim();
+  }
+
+  return value.toFixed(2);
+}`,
+      explanation:
+        "这里 number 调用最终返回 toFixed 的结果，所以返回类型是 string。重载让调用方能得到精确返回值。"
+    },
+    debugCase: {
+      title: "实现签名要覆盖所有重载参数",
+      broken: `function read(value: string): string;
+function read(value: number): number;
+function read(value: string) {
+  return value;
+}`,
+      fixed: `function read(value: string): string;
+function read(value: number): number;
+function read(value: string | number) {
+  return value;
+}`,
+      reason:
+        "实现签名必须能接住所有重载签名的参数。既然有 number 重载，实现参数就不能只写 string。"
+    },
+    checklist: [
+      "知道重载签名和实现签名的区别",
+      "能为不同参数声明不同返回类型",
+      "知道实现签名必须覆盖所有重载"
+    ]
+  },
+  {
+    id: "typed-event-bus",
+    title: "类型安全事件总线",
+    difficulty: "进阶",
+    minutes: 35,
+    goal: "用映射类型约束事件名和 payload 的对应关系。",
+    concept: [
+      "事件总线的核心类型是 EventMap：事件名对应 payload。",
+      "emit/on 的事件名用 keyof EventMap 限制。",
+      "payload 类型用 EventMap[K] 根据事件名精确推导。"
+    ],
+    jsThinking:
+      "JS 事件名通常是字符串，payload 传错形状要到监听器里才发现。",
+    tsThinking:
+      "TS 可以让每个事件名绑定自己的 payload 类型，emit 和 on 两边同时受保护。",
+    example: `type Events = {
+  login: { userId: string };
+  logout: undefined;
+};
+
+function emit<K extends keyof Events>(event: K, payload: Events[K]) {
+  console.log(event, payload);
+}
+
+emit("login", { userId: "u1" });`,
+    exercise: {
+      prompt: "给 on 函数补类型，让 handler 的 payload 跟事件名匹配。",
+      starter: `type Events = {
+  saved: { id: number };
+  failed: { message: string };
+};
+
+function on(event, handler) {
+  console.log(event, handler);
+}`,
+      answer: `type Events = {
+  saved: { id: number };
+  failed: { message: string };
+};
+
+function on<K extends keyof Events>(event: K, handler: (payload: Events[K]) => void) {
+  console.log(event, handler);
+}`,
+      explanation:
+        "K 是具体事件名，Events[K] 会取出这个事件对应的 payload 类型。选择 saved 时 payload 就是 { id: number }。"
+    },
+    debugCase: {
+      title: "事件名和 payload 不能各自独立",
+      broken: `type Events = {
+  saved: { id: number };
+  failed: { message: string };
+};
+
+function emit(event: keyof Events, payload: Events[keyof Events]) {
+  console.log(event, payload);
+}`,
+      fixed: `type Events = {
+  saved: { id: number };
+  failed: { message: string };
+};
+
+function emit<K extends keyof Events>(event: K, payload: Events[K]) {
+  console.log(event, payload);
+}`,
+      reason:
+        "Events[keyof Events] 会把所有 payload 混成 union，失去事件名和 payload 的对应关系。用 K 把两者绑定起来。"
+    },
+    checklist: [
+      "能设计 EventMap",
+      "能用 keyof 限制事件名",
+      "能用 EventMap[K] 绑定 payload"
+    ]
+  },
+  {
+    id: "typed-route-params",
+    title: "类型安全路由参数",
+    difficulty: "进阶",
+    minutes: 35,
+    goal: "从路径字符串中提取 :id 这类动态参数名。",
+    concept: [
+      "模板字面量类型可以匹配字符串模式。",
+      "infer 可以从路径片段中提取参数名。",
+      "递归条件类型可以继续处理剩余路径。"
+    ],
+    jsThinking:
+      "JS 路由参数名通常藏在字符串里，params.id 是否存在靠人记。",
+    tsThinking:
+      "TS 可以从路径字符串推导 params 对象，让路径和参数类型保持同步。",
+    example: `type ExtractParam<Path extends string> =
+  Path extends \`:\${infer Param}\` ? Param : never;
+
+type A = ExtractParam<":id">;`,
+    exercise: {
+      prompt: "写一个提取单段路由参数的类型 ExtractParam。",
+      starter: `type ExtractParam<Path extends string> = unknown;
+
+type UserParam = ExtractParam<":userId">;
+type StaticParam = ExtractParam<"settings">;`,
+      answer: `type ExtractParam<Path extends string> =
+  Path extends \`:\${infer Param}\` ? Param : never;
+
+type UserParam = ExtractParam<":userId">;
+type StaticParam = ExtractParam<"settings">;`,
+      explanation:
+        "如果 Path 符合 :xxx，就用 infer Param 提取 xxx；否则没有参数，返回 never。"
+    },
+    debugCase: {
+      title: "没有递归就只能处理一段",
+      broken: `type RouteParams<Path extends string> =
+  Path extends \`/\${infer Segment}\`
+    ? Segment extends \`:\${infer Param}\`
+      ? Record<Param, string>
+      : {}
+    : {};`,
+      fixed: `type RouteParams<Path extends string> =
+  Path extends \`\${string}:\${infer Param}/\${infer Rest}\`
+    ? Record<Param, string> & RouteParams<Rest>
+    : Path extends \`\${string}:\${infer Param}\`
+      ? Record<Param, string>
+      : {};
+
+type Params = RouteParams<"/users/:id/posts/:postId">;`,
+      reason:
+        "多参数路径需要继续分析剩余字符串。递归条件类型可以逐段提取 id、postId 等参数。"
+    },
+    checklist: [
+      "能用模板字面量类型匹配字符串结构",
+      "能用 infer 提取路径参数名",
+      "知道递归可以处理多段路径"
+    ]
+  },
+  {
+    id: "nested-field-paths",
+    title: "嵌套字段路径类型",
+    difficulty: "进阶",
+    minutes: 35,
+    goal: "从嵌套对象类型生成 user.name、address.city 这类字段路径。",
+    concept: [
+      "字段路径类型常用于表单、表格列、错误对象和配置面板。",
+      "它结合 keyof、模板字面量类型和递归类型。",
+      "为了降低复杂度，通常先只支持普通对象，不处理数组。"
+    ],
+    jsThinking:
+      "JS 表单字段路径常写成字符串，拼错后提交或校验时才发现。",
+    tsThinking:
+      "TS 可以从表单数据类型生成合法路径 union，让字段名字符串也变安全。"
+    ,
+    example: `type FieldPath<T> = {
+  [K in keyof T & string]: T[K] extends object
+    ? K | \`\${K}.\${FieldPath<T[K]>}\`
+    : K;
+}[keyof T & string];
+
+type FormValues = {
+  user: {
+    name: string;
+  };
+  active: boolean;
+};
+
+type Path = FieldPath<FormValues>;`,
+    exercise: {
+      prompt: "写一个浅层 FieldName<T>，只提取对象第一层 key。",
+      starter: `type FieldName<T> = unknown;
+
+type Form = {
+  name: string;
+  email: string;
+};`,
+      answer: `type FieldName<T> = keyof T & string;
+
+type Form = {
+  name: string;
+  email: string;
+};`,
+      explanation:
+        "字段名通常要当字符串使用。keyof T 可能包含 number 或 symbol，所以用 keyof T & string 取字符串 key。"
+    },
+    debugCase: {
+      title: "递归路径要把当前 key 和子路径拼起来",
+      broken: `type FieldPath<T> = {
+  [K in keyof T & string]: T[K] extends object
+    ? FieldPath<T[K]>
+    : K;
+}[keyof T & string];`,
+      fixed: `type FieldPath<T> = {
+  [K in keyof T & string]: T[K] extends object
+    ? K | \`\${K}.\${FieldPath<T[K]>}\`
+    : K;
+}[keyof T & string];`,
+      reason:
+        "只返回子路径会得到 name，却丢掉 user.name 的完整路径。需要用模板字面量把当前 key 和子路径连接起来。"
+    },
+    checklist: [
+      "知道字段路径类型解决什么问题",
+      "能用 keyof T & string 提取字符串 key",
+      "能读懂递归路径拼接"
+    ]
+  },
+  {
+    id: "zod-runtime-validation",
+    title: "Zod 与运行时校验",
+    difficulty: "进阶",
+    minutes: 35,
+    goal: "理解 TypeScript 类型和运行时数据校验的边界。",
+    concept: [
+      "TypeScript 类型编译后会消失，不能校验真实接口数据。",
+      "Zod 这类 schema 库可以在运行时检查 unknown 数据。",
+      "z.infer 可以从 schema 推导 TypeScript 类型，让校验和类型共用一个来源。"
+    ],
+    jsThinking:
+      "JS 里接口返回什么就直接用，遇到脏数据时才在页面上暴露问题。",
+    tsThinking:
+      "TS 负责编译期约束，Zod 负责运行时校验，两者配合可以守住接口边界。",
+    example: `import { z } from "zod";
+
+const UserSchema = z.object({
+  id: z.number(),
+  name: z.string()
+});
+
+type User = z.infer<typeof UserSchema>;
+
+function parseUser(value: unknown): User {
+  return UserSchema.parse(value);
+}`,
+    exercise: {
+      prompt: "用 z.infer 从 ProductSchema 推导 Product 类型。",
+      starter: `import { z } from "zod";
+
+const ProductSchema = z.object({
+  id: z.number(),
+  title: z.string(),
+  price: z.number()
+});
+
+type Product = unknown;`,
+      answer: `import { z } from "zod";
+
+const ProductSchema = z.object({
+  id: z.number(),
+  title: z.string(),
+  price: z.number()
+});
+
+type Product = z.infer<typeof ProductSchema>;`,
+      explanation:
+        "typeof ProductSchema 拿到 schema 的类型，z.infer 会从 schema 里推导出对应的 TS 类型。"
+    },
+    debugCase: {
+      title: "as User 不等于运行时校验",
+      broken: `type User = {
+  id: number;
+  name: string;
+};
+
+function parseUser(value: unknown): User {
+  return value as User;
+}`,
+      fixed: `import { z } from "zod";
+
+const UserSchema = z.object({
+  id: z.number(),
+  name: z.string()
+});
+
+type User = z.infer<typeof UserSchema>;
+
+function parseUser(value: unknown): User {
+  return UserSchema.parse(value);
+}`,
+      reason:
+        "as User 只是类型断言，不会检查真实数据。schema.parse 会在运行时验证数据结构，不符合时抛出错误。"
+    },
+    checklist: [
+      "知道 TS 类型不会存在于运行时",
+      "知道 schema.parse 会做真实校验",
+      "能用 z.infer 从 schema 推导类型"
+    ]
+  },
+  {
+    id: "type-tests",
+    title: "类型测试入门",
+    difficulty: "进阶",
+    minutes: 30,
+    goal: "用类型断言测试工具类型是否得到预期结果。",
+    concept: [
+      "类型测试不会运行，它依赖 TypeScript 编译器报错或不报错。",
+      "Expect 和 Equal 可以验证两个类型是否相等。",
+      "@ts-expect-error 可以确认某行代码应该报错。"
+    ],
+    jsThinking:
+      "JS 测试通常运行函数，检查返回值。",
+    tsThinking:
+      "TS 工具类型没有运行时值，需要用编译期测试确认推导结果正确。",
+    example: `type Equal<A, B> =
+  (<T>() => T extends A ? 1 : 2) extends
+  (<T>() => T extends B ? 1 : 2)
+    ? true
+    : false;
+
+type Expect<T extends true> = T;
+
+type Test = Expect<Equal<"a" | "b", "a" | "b">>;`,
+    exercise: {
+      prompt: "为 ArrayItem<T> 写一个类型测试。",
+      starter: `type ArrayItem<T> = T extends Array<infer Item> ? Item : never;
+
+type Equal<A, B> =
+  (<T>() => T extends A ? 1 : 2) extends
+  (<T>() => T extends B ? 1 : 2)
+    ? true
+    : false;
+
+type Expect<T extends true> = T;
+
+type TestArrayItem = unknown;`,
+      answer: `type ArrayItem<T> = T extends Array<infer Item> ? Item : never;
+
+type Equal<A, B> =
+  (<T>() => T extends A ? 1 : 2) extends
+  (<T>() => T extends B ? 1 : 2)
+    ? true
+    : false;
+
+type Expect<T extends true> = T;
+
+type TestArrayItem = Expect<Equal<ArrayItem<string[]>, string>>;`,
+      explanation:
+        "如果 ArrayItem<string[]> 不是 string，Equal 会得到 false，而 Expect<false> 会触发类型错误。"
+    },
+    debugCase: {
+      title: "@ts-expect-error 必须真的有错误",
+      broken: `// @ts-expect-error
+const value: string = "hello";`,
+      fixed: `// @ts-expect-error
+const value: string = 123;`,
+      reason:
+        "@ts-expect-error 表示下一行应该报错。如果下一行没有错误，TS 会反过来提醒你这条注释失效。"
+    },
+    checklist: [
+      "知道类型测试依赖编译期检查",
+      "能读懂 Expect<Equal<A, B>>",
+      "知道 @ts-expect-error 的用途"
+    ]
   }
 ];
