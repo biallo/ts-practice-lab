@@ -199,6 +199,7 @@ function App() {
         </div>
 
         <LessonContent
+          isDone={Boolean(progress[activeLesson.id])}
           lesson={activeLesson}
           markDone={markDone}
           practiceDraft={practiceDrafts[activeLesson.id] ?? activeLesson.exercise.starter}
@@ -233,6 +234,7 @@ function App() {
 type LessonContentProps = {
   debugDraft: string;
   debugResult: string;
+  isDone: boolean;
   lesson: Lesson;
   markDone: () => void;
   practiceDraft: string;
@@ -251,6 +253,7 @@ type LessonContentProps = {
 function LessonContent({
   debugDraft,
   debugResult,
+  isDone,
   lesson,
   markDone,
   practiceDraft,
@@ -382,9 +385,9 @@ function LessonContent({
               </li>
             ))}
           </ul>
-          <button className="primary" onClick={markDone} type="button">
+          <button className={isDone ? "primary done-action" : "primary"} onClick={markDone} type="button">
             <CheckCircle2 size={18} />
-            <span>标记为已完成</span>
+            <span>{isDone ? "已完成" : "标记为已完成"}</span>
           </button>
         </article>
       </section>

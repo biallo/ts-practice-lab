@@ -267,6 +267,11 @@ h1 {
   color: #ffffff;
 }
 
+.primary.done-action {
+  background: #1b7f79;
+  color: #ffffff;
+}
+
 .tabs {
   display: flex;
   flex-wrap: wrap;
