@@ -156,7 +156,7 @@ function App() {
               <span className="lesson-number">{String(index + 1).padStart(2, "0")}</span>
               <span className="lesson-copy">
                 <strong>{lesson.title}</strong>
-                <small>{lesson.difficulty} · {lesson.minutes} 分钟</small>
+                <small>{lesson.difficulty}</small>
               </span>
               {progress[lesson.id] && <CheckCircle2 className="done-icon" size={18} />}
             </button>
