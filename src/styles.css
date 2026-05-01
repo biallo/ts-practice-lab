@@ -192,6 +192,44 @@ button {
   padding: 32px;
 }
 
+@media (min-width: 921px) {
+  .sidebar {
+    position: sticky;
+    top: 0;
+    max-height: 100vh;
+  }
+
+  .lesson-list {
+    flex: 1;
+    min-height: 0;
+    margin-right: -14px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding-right: 14px;
+    scrollbar-color: rgba(102, 112, 133, 0.45) transparent;
+    scrollbar-gutter: stable;
+    scrollbar-width: thin;
+  }
+
+  .lesson-list::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .lesson-list::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .lesson-list::-webkit-scrollbar-thumb {
+    border: 2px solid #ffffff;
+    border-radius: 999px;
+    background: rgba(102, 112, 133, 0.42);
+  }
+
+  .lesson-list::-webkit-scrollbar-thumb:hover {
+    background: rgba(102, 112, 133, 0.58);
+  }
+}
+
 .hero-panel {
   display: flex;
   align-items: flex-start;
