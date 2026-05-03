@@ -49,16 +49,6 @@ function App() {
     scrollWorkspaceToTop(workspaceRef.current);
   };
 
-  const nextLesson = () => {
-    const next = lessons[Math.min(activeIndex + 1, lessons.length - 1)];
-    selectLesson(next);
-  };
-
-  const previousLesson = () => {
-    const previous = lessons[Math.max(activeIndex - 1, 0)];
-    selectLesson(previous);
-  };
-
   const markDone = () => {
     setProgress((current) => ({
       ...current,
@@ -98,11 +88,8 @@ function App() {
 
       <section className="workspace" ref={workspaceRef}>
         <LessonHeader
-          activeIndex={activeIndex}
           currentStatus={currentStatus}
           lesson={activeLesson}
-          onNextLesson={nextLesson}
-          onPreviousLesson={previousLesson}
         />
 
         <LessonTabs activeTab={activeTab} onTabChange={setActiveTab} />

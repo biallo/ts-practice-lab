@@ -23,14 +23,12 @@
   line-height: 1.65;
 }
 
-.hero-actions,
 .button-row {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
 }
 
-.hero-actions button,
 .primary,
 .secondary {
   display: inline-flex;
@@ -44,26 +42,20 @@
   font-weight: 800;
 }
 
-.hero-actions button,
 .secondary {
   border: 1px solid #cfd8e3;
   background: #ffffff;
   color: #344054;
 }
 
-.hero-actions button:disabled {
-  cursor: not-allowed;
-  opacity: 0.45;
-}
-
 .primary {
-  background: #b9472f;
+  background: #1b7f79;
   color: #ffffff;
 }
 
 .primary.done-action {
-  background: #1b7f79;
-  color: #ffffff;
+  background: #eef2f6;
+  color: #667085;
 }
 
 .tabs {

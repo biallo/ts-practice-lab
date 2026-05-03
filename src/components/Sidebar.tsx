@@ -62,21 +62,28 @@ export function Sidebar({
       </label>
 
       <nav className="lesson-list">
-        {lessons.map((lesson, index) => (
-          <button
-            className={lesson.id === activeLesson.id ? "lesson-item active" : "lesson-item"}
-            key={lesson.id}
-            onClick={() => onLessonSelect(lesson)}
-            type="button"
-          >
-            <span className="lesson-number">{String(index + 1).padStart(2, "0")}</span>
-            <span className="lesson-copy">
-              <strong>{lesson.title}</strong>
-              <small>{lesson.difficulty}</small>
-            </span>
-            {progress[lesson.id] && <CheckCircle2 className="done-icon" size={18} />}
-          </button>
-        ))}
+        {lessons.map((lesson, index) => {
+          const isActive = lesson.id === activeLesson.id;
+          const isCompleted = Boolean(progress[lesson.id]);
+
+          return (
+            <button
+              className={["lesson-item", isActive ? "active" : "", isCompleted ? "completed" : ""]
+                .filter(Boolean)
+                .join(" ")}
+              key={lesson.id}
+              onClick={() => onLessonSelect(lesson)}
+              type="button"
+            >
+              <span className="lesson-number">{String(index + 1).padStart(2, "0")}</span>
+              <span className="lesson-copy">
+                <strong>{lesson.title}</strong>
+                <small>{lesson.difficulty}</small>
+              </span>
+              {isCompleted && <CheckCircle2 className="done-icon" size={18} />}
+            </button>
+          );
+        })}
       </nav>
     </aside>
   );
