@@ -180,17 +180,20 @@
   }
 
   .code-block,
-  .code-editor {
+  .code-editor,
+  .code-editor-highlight {
     padding: 14px;
     font-size: 14px;
     line-height: 1.6;
   }
 
-  .editor-wrap span {
+  .editor-wrap > span {
     font-size: 15px;
   }
 
-  .code-editor {
+  .code-editor-frame,
+  .code-editor,
+  .code-editor-highlight {
     min-height: 320px;
   }
 

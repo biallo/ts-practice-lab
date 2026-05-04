@@ -1,3 +1,5 @@
+import { highlightCode } from "../utils/highlight";
+
 type CodeBlockProps = {
   code: string;
   tone?: "default" | "success" | "danger";
@@ -6,7 +8,7 @@ type CodeBlockProps = {
 export function CodeBlock({ code, tone = "default" }: CodeBlockProps) {
   return (
     <pre className={`code-block ${tone}`}>
-      <code>{code}</code>
+      <code dangerouslySetInnerHTML={{ __html: highlightCode(code) }} />
     </pre>
   );
 }
