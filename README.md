@@ -1,59 +1,20 @@
 # TS Practice Lab
 
-一个给 JS / React 开发者练 TypeScript 的本地学习项目。它不是文档合集，而是一个可以跑起来的练习界面：
-
-- 每课都有核心讲解
-- 每课都有 TypeScript 练习题
-- 每课都有错误代码和修正代码
-- 可以标记完成并追踪进度
-- 刷新或重启后会恢复上次学习位置和代码草稿
+一个给 JS / React 开发者练 TypeScript 的本地学习项目。
 
 ## 在线预览
 
 https://biallo.github.io/ts-practice-lab/
 
-## 运行
+## 开发
 
 ```bash
 npm install
 npm run dev
 ```
 
-## 课程顺序
+## 编译和构建
 
-1. 给变量和函数补类型
-2. 对象、type 和 React Props
-3. Union 类型和类型收窄
-4. React Hooks 的类型
-5. unknown、泛型和工具类型
-6. interface vs type
-7. keyof 和索引访问类型
-8. typeof 和 as const
-9. 泛型约束 extends
-10. 类型保护 type guard
-11. API 响应泛型建模
-12. satisfies 操作符
-13. React children 和组件类型
-14. tsconfig 和 strict 模式
-15. 条件类型
-16. infer 推断
-17. 映射类型 mapped types
-18. 深入内置工具类型
-19. Discriminated Union 可辨识联合
-20. React 事件和表单类型
-21. 类型安全的配置对象
-22. API 与错误响应建模
-23. 模板字面量类型
-24. Key remapping 键名重映射
-25. 递归类型
-26. 深度工具类型
-27. 函数重载 overload
-28. 类型安全事件总线
-29. 类型安全路由参数
-30. 嵌套字段路径类型
-31. Zod 与运行时校验
-32. 类型测试入门
-
-## 你可以继续扩展
-
-课程数据在 `src/data/lessons.ts`。想加一课，只要按现有 `Lesson` 结构追加对象即可。
+```shell
+npm run build
+```
