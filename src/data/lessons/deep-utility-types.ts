@@ -6,15 +6,18 @@ export const deepUtilityTypesLesson: Lesson = {
   difficulty: "进阶",
   goal: "写出 DeepPartial、DeepReadonly 这类递归转换对象的类型。",
   concept: [
-    "浅层 Partial 只影响第一层字段，深度工具类型会递归处理嵌套对象。",
-    "递归工具类型通常用条件类型判断是否继续深入。",
-    "数组和函数要谨慎处理，不同项目会有不同取舍。"
+    "浅层 Partial 只影响第一层字段，深度工具类型会递归处理嵌套对象里的每一层字段。",
+    "递归工具类型通常用条件类型判断是否继续深入，例如 T[K] extends object ? ... : T[K]。",
+    "映射类型负责遍历当前层字段，条件类型负责判断字段值是否还需要递归。",
+    "数组和函数要谨慎处理，不同项目会有不同取舍；入门版本通常先关注普通对象。",
+    "深度工具类型适合配置补丁、表单草稿、只读配置等需要跨层级转换的场景。"
   ],
   jsThinking:
     "JS 里深层配置对象经常只改其中一小块。",
   tsThinking:
     "TS 可以让嵌套对象的每一层都变成可选或只读，贴近真实更新场景。",
   example: `type DeepPartial<T> = {
+  // 当前层字段变可选；如果字段值还是对象，就继续递归
   [K in keyof T]?: T[K] extends object ? DeepPartial<T[K]> : T[K];
 };
 
@@ -26,6 +29,7 @@ type Settings = {
   };
 };
 
+// SettingsPatch 允许只提供 user.profile.name 这一小块
 type SettingsPatch = DeepPartial<Settings>;`,
   exercise: {
     prompt: "写一个 DeepReadonly<T>，让嵌套对象字段也 readonly。",

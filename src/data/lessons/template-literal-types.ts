@@ -6,20 +6,26 @@ export const templateLiteralTypesLesson: Lesson = {
   difficulty: "进阶",
   goal: "用字符串拼接能力在类型层面生成更精确的字符串 union。",
   concept: [
-    "模板字面量类型使用和 JS 模板字符串类似的语法，但它发生在类型层面。",
-    "它可以把多个字符串 union 组合成新的字符串 union。",
-    "常见用途包括事件名、路由名、CSS token、对象字段派生命名。"
+    "模板字面量类型使用和 JS 模板字符串类似的语法，但它发生在类型层面，不会真的拼接运行时字符串。",
+    "它可以把一个或多个字符串 union 组合成新的字符串 union，例如 \`button-\${Size}\`。",
+    "当模板中有多个 union 时，TS 会生成所有组合结果，适合表达有限的命名规则。",
+    "常见用途包括事件名、路由名、CSS token、对象字段派生命名。",
+    "配合 keyof、Capitalize 等工具类型，可以从对象字段自动生成 getX、onXChange 这类字符串类型。"
   ],
   jsThinking:
     "JS 里可以运行时拼接字符串，但拼错事件名或 key 通常要运行后才发现。",
   tsThinking:
     "TS 可以在类型层面拼接字符串，让合法字符串集合提前变成可检查的类型。",
   example: `type Field = "name" | "email";
+
+// 得到 "nameChanged" | "emailChanged"
 type EventName = \`\${Field}Changed\`;
 
 const event: EventName = "nameChanged";
 
 type Size = "sm" | "md" | "lg";
+
+// 得到 "button-sm" | "button-md" | "button-lg"
 type ButtonClass = \`button-\${Size}\`;`,
   exercise: {
     prompt: "用模板字面量类型生成 route:home、route:settings、route:profile。",

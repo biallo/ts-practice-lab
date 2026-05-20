@@ -6,23 +6,28 @@ export const reactEventsFormsLesson: Lesson = {
   difficulty: "常用",
   goal: "掌握 input、form、select、textarea 的常见事件类型。",
   concept: [
-    "input onChange 常用 React.ChangeEvent<HTMLInputElement>。",
-    "form onSubmit 常用 React.FormEvent<HTMLFormElement>。",
-    "不同元素要写不同的 HTMLElement 类型，比如 HTMLSelectElement、HTMLTextAreaElement。"
+    "React 事件类型通常写成 React.XxxEvent<具体元素>，尖括号里是触发事件的 DOM 元素类型。",
+    "input onChange 常用 React.ChangeEvent<HTMLInputElement>，这样 event.target.value 会被识别为字符串。",
+    "form onSubmit 常用 React.FormEvent<HTMLFormElement>，提交时通常先调用 preventDefault 阻止页面刷新。",
+    "不同元素要写不同的 HTMLElement 类型，比如 HTMLSelectElement、HTMLTextAreaElement。",
+    "优先使用 event.currentTarget 读取当前绑定事件的元素；target 可能来自内部子元素，类型有时更宽。"
   ],
   jsThinking:
     "JS 里 event.target.value 能跑就行，但 target 到底是什么元素不明确。",
   tsThinking:
     "TS 里事件类型会告诉你 target/currentTarget 上有哪些安全可用的属性。",
   example: `function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  // 表单提交默认会刷新页面，React 表单通常先阻止默认行为
   event.preventDefault();
 }
 
 function handleEmailChange(event: React.ChangeEvent<HTMLInputElement>) {
+  // input 事件类型让 target.value 保持 string
   console.log(event.target.value);
 }
 
 function handleRoleChange(event: React.ChangeEvent<HTMLSelectElement>) {
+  // select 要使用 HTMLSelectElement，后续访问 selectedOptions 才准确
   console.log(event.target.value);
 }`,
   exercise: {

@@ -6,15 +6,18 @@ export const mappedTypesLesson: Lesson = {
   difficulty: "进阶",
   goal: "用 [K in keyof T] 批量转换对象类型的属性。",
   concept: [
-    "映射类型会遍历 key union，并为每个 key 生成新属性。",
-    "[K in keyof T] 是很多工具类型的基础写法。",
-    "可以在映射时添加或移除 readonly、? 等修饰符。"
+    "映射类型会遍历 key union，并为每个 key 生成新属性，像是在类型层面对对象字段做循环。",
+    "[K in keyof T] 是很多工具类型的基础写法，其中 K 依次代表 T 的每个字段名。",
+    "T[K] 可以保留原字段的 value 类型，避免转换后丢失字段和类型之间的对应关系。",
+    "可以在映射时添加或移除 readonly、? 等修饰符，例如生成只读对象或可选对象。",
+    "Partial、Required、Readonly、Pick 等内置工具类型都可以用映射类型理解。"
   ],
   jsThinking:
     "JS 里可以遍历对象 key 生成新对象。",
   tsThinking:
     "TS 也能在类型层面遍历对象 key，生成新的对象类型。",
   example: `type MyPartial<T> = {
+  // 遍历 T 的每个字段，并给生成字段加上 ?
   [K in keyof T]?: T[K];
 };
 
@@ -23,6 +26,7 @@ type User = {
   name: string;
 };
 
+// UserPatch 的 id、name 都变成可选字段
 type UserPatch = MyPartial<User>;`,
   exercise: {
     prompt: "写一个 ReadonlyCopy<T>，让对象所有属性都变成 readonly。",

@@ -6,9 +6,11 @@ export const interfaceVsTypeLesson: Lesson = {
   difficulty: "常用",
   goal: "理解 interface 和 type 的差异，知道在项目里如何选择。",
   concept: [
-    "interface 常用于描述对象形状，尤其是组件 props、类实例、公共 API。",
-    "type 更通用，可以描述 union、tuple、函数类型、工具类型组合。",
-    "interface 可以声明合并；type 不能重复声明同名类型。"
+    "interface 常用于描述对象形状，尤其是组件 props、类实例、公共 API 这类需要被别人实现或扩展的结构。",
+    "type 更通用，可以描述 union、tuple、函数类型、交叉类型和工具类型组合。",
+    "interface 可以 extends 另一个 interface；type 可以用 & 做组合，两者都能复用已有对象结构。",
+    "interface 可以声明合并，适合某些库类型扩展场景；type 不能重复声明同名类型。",
+    "项目里不必过度纠结：对象 props 用 interface 或 type 都可以，union 和复杂类型组合优先用 type。"
   ],
   jsThinking:
     "JS 里对象只是临时约定，多个地方都能随手传类似结构。",
@@ -19,8 +21,10 @@ export const interfaceVsTypeLesson: Lesson = {
   name: string;
 }
 
+// union 不能用 interface 表达，适合用 type
 type Status = "idle" | "loading" | "success";
 
+// type 可以用 & 把对象结构和额外字段组合起来
 type UserCardProps = User & {
   status: Status;
 };`,

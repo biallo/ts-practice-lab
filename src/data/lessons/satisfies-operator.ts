@@ -6,9 +6,11 @@ export const satisfiesOperatorLesson: Lesson = {
   difficulty: "进阶",
   goal: "在校验对象形状的同时，保留对象自身的精确类型。",
   concept: [
-    "satisfies 会检查一个值是否满足某个类型，但不会强行把值变宽。",
-    "它很适合配置对象、映射表、路由表、主题 token。",
-    "相比 as，satisfies 更像校验，不是强制断言。"
+    "satisfies 会检查一个值是否满足某个类型，但不会把这个值强行变成目标类型。",
+    "它适合配置对象、映射表、路由表、主题 token，因为这些对象既要被校验，又要保留具体 key 和字面量 value。",
+    "相比 as，satisfies 更像校验；as 更像强制告诉 TS 相信我，容易掩盖缺字段或错字段。",
+    "相比直接写变量类型，satisfies 通常能保留更精确的推断结果，例如具体字符串字面量和具体对象 key。",
+    "当你想检查对象满足某个契约，同时还想继续使用对象自己的精确类型时，优先考虑 satisfies。"
   ],
   jsThinking:
     "JS 配置对象写错 key 或 value，通常要运行后才知道。",
@@ -20,8 +22,10 @@ export const satisfiesOperatorLesson: Lesson = {
 };
 
 const theme = {
+  // mode 会被检查是否属于 "light" | "dark"
   mode: "dark",
   accent: "#1b7f79"
+  // satisfies 负责校验 Theme，但保留 theme 自己的精确推断
 } satisfies Theme;`,
   exercise: {
     prompt: "用 satisfies 校验 routeLabels 必须覆盖所有 Route。",

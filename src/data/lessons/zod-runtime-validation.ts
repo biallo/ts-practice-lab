@@ -6,9 +6,11 @@ export const zodRuntimeValidationLesson: Lesson = {
   difficulty: "进阶",
   goal: "理解 TypeScript 类型和运行时数据校验的边界。",
   concept: [
-    "TypeScript 类型编译后会消失，不能校验真实接口数据。",
-    "Zod 这类 schema 库可以在运行时检查 unknown 数据。",
-    "z.infer 可以从 schema 推导 TypeScript 类型，让校验和类型共用一个来源。"
+    "TypeScript 类型编译后会消失，不能校验真实接口数据、localStorage 数据或用户输入。",
+    "外部数据进入系统时通常应先当作 unknown，再通过运行时校验确认结构。",
+    "Zod 这类 schema 库可以在运行时检查 unknown 数据，不符合结构时抛错或返回失败结果。",
+    "z.infer 可以从 schema 推导 TypeScript 类型，让校验规则和 TS 类型共用一个来源。",
+    "Zod 和 TS 的职责不同：TS 管编译期约束，Zod 管运行时边界。"
   ],
   jsThinking:
     "JS 里接口返回什么就直接用，遇到脏数据时才在页面上暴露问题。",
@@ -17,13 +19,16 @@ export const zodRuntimeValidationLesson: Lesson = {
   example: `import { z } from "zod";
 
 const UserSchema = z.object({
+  // schema 会在运行时检查字段类型
   id: z.number(),
   name: z.string()
 });
 
+// 从 schema 自动推导 TS 类型，避免手写重复的 User
 type User = z.infer<typeof UserSchema>;
 
 function parseUser(value: unknown): User {
+  // parse 会真实校验 unknown 数据，不符合时抛出错误
   return UserSchema.parse(value);
 }`,
   exercise: {

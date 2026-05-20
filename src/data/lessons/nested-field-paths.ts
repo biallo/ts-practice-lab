@@ -6,9 +6,11 @@ export const nestedFieldPathsLesson: Lesson = {
   difficulty: "进阶",
   goal: "从嵌套对象类型生成 user.name、address.city 这类字段路径。",
   concept: [
-    "字段路径类型常用于表单、表格列、错误对象和配置面板。",
-    "它结合 keyof、模板字面量类型和递归类型。",
-    "为了降低复杂度，通常先只支持普通对象，不处理数组。"
+    "字段路径类型把嵌套对象的字段变成字符串 union，例如 \"user\" | \"user.name\"。",
+    "它常用于表单字段名、表格列、错误对象和配置面板，能提前发现路径字符串拼错。",
+    "实现时通常结合 keyof 取当前层 key，模板字面量类型拼接父子路径，递归类型继续深入子对象。",
+    "keyof T & string 用来只保留字符串 key，因为路径字符串不能直接使用 symbol key。",
+    "为了降低复杂度，通常先只支持普通对象，不处理数组；真实项目可再按需求扩展数组路径。"
   ],
   jsThinking:
     "JS 表单字段路径常写成字符串，拼错后提交或校验时才发现。",
@@ -16,7 +18,9 @@ export const nestedFieldPathsLesson: Lesson = {
     "TS 可以从表单数据类型生成合法路径 union，让字段名字符串也变安全。"
   ,
   example: `type FieldPath<T> = {
+  // K 是当前层字段名；只保留 string key 才能拼接路径
   [K in keyof T & string]: T[K] extends object
+    // 对象字段既可以选当前 key，也可以继续拼接子路径
     ? K | \`\${K}.\${FieldPath<T[K]>}\`
     : K;
 }[keyof T & string];
@@ -28,6 +32,7 @@ type FormValues = {
   active: boolean;
 };
 
+// 得到 "user" | "user.name" | "active"
 type Path = FieldPath<FormValues>;`,
   exercise: {
     prompt: "写一个浅层 FieldName<T>，只提取对象第一层 key。",

@@ -6,17 +6,19 @@ export const apiErrorModelingLesson: Lesson = {
   difficulty: "进阶",
   goal: "用泛型和 discriminated union 同时建模成功响应和失败响应。",
   concept: [
-    "真实接口通常有成功和失败两种结构。",
-    "ApiResult<T> 可以让成功分支携带 T，失败分支携带错误信息。",
-    "调用方判断 ok 后，TS 会自动收窄到成功或失败分支。"
+    "真实接口通常有成功和失败两种结构，不能只按成功返回建模。",
+    "ApiResult<T> 可以让成功分支携带 T，失败分支携带错误码、错误信息等诊断字段。",
+    "ok、status、type 这类字段可以作为辨识字段，让 TS 判断后自动收窄到成功或失败分支。",
+    "成功分支才应该有 data，失败分支才应该有 error；不要把它们都做成可选字段混在一个对象里。",
+    "调用方判断 ok 后再读取 data，会让错误处理成为类型要求的一部分，而不是靠记忆。"
   ],
   jsThinking:
     "JS 里常常假设接口成功，然后在运行时遇到 error 才补判断。",
   tsThinking:
     "TS 可以把成功和失败都写进类型里，逼迫调用方处理两种结果。",
   example: `type ApiResult<T> =
-  | { ok: true; data: T }
-  | { ok: false; error: { code: string; message: string } };
+  | { ok: true; data: T } // 成功分支：携带业务数据
+  | { ok: false; error: { code: string; message: string } }; // 失败分支：携带错误信息
 
 type User = {
   id: number;
@@ -24,10 +26,12 @@ type User = {
 };
 
 function renderUser(result: ApiResult<User>) {
+  // 判断 ok 后，result 被收窄为成功分支
   if (result.ok) {
     return result.data.name;
   }
 
+  // 这里 result 是失败分支，只能读取 error
   return result.error.message;
 }`,
   exercise: {

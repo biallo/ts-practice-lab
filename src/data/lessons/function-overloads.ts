@@ -6,18 +6,21 @@ export const functionOverloadsLesson: Lesson = {
   difficulty: "进阶",
   goal: "让一个函数根据不同参数形式返回不同的精确类型。",
   concept: [
-    "函数重载由多个重载签名和一个实现签名组成。",
-    "调用方只能看到重载签名，函数体使用实现签名。",
-    "当返回类型取决于参数组合时，重载比宽泛 union 更清晰。"
+    "函数重载由多个重载签名和一个实现签名组成，重载签名写给调用方看，实现签名写给函数体用。",
+    "调用方只能按重载签名调用函数，不能直接依赖实现签名里的宽泛 union。",
+    "实现签名必须能覆盖所有重载签名的参数，否则函数体接不住某些合法调用。",
+    "当返回类型取决于参数组合时，重载比单纯返回宽泛 union 更清晰。",
+    "重载适合少量明确调用形态；如果组合很多，通常要考虑泛型、条件类型或拆分函数。"
   ],
   jsThinking:
     "JS 里一个函数可以接 string 或 number，然后运行时判断。",
   tsThinking:
     "TS 可以把不同调用方式分别声明出来，让返回值类型跟着参数变化。"
   ,
-  example: `function parseValue(value: string): string[];
-function parseValue(value: number): number;
+  example: `function parseValue(value: string): string[]; // 调用方传 string 时返回 string[]
+function parseValue(value: number): number; // 调用方传 number 时返回 number
 function parseValue(value: string | number) {
+  // 实现签名用 union 接住所有重载参数
   if (typeof value === "string") {
     return value.split(",");
   }
@@ -25,7 +28,10 @@ function parseValue(value: string | number) {
   return value * 2;
 }
 
+// tags 被推断为 string[]
 const tags = parseValue("a,b");
+
+// count 被推断为 number
 const count = parseValue(2);`,
   exercise: {
     prompt: "给 formatInput 添加重载：string 返回 string，number 返回 number。",

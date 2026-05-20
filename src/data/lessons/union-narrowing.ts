@@ -6,28 +6,33 @@ export const unionNarrowingLesson: Lesson = {
   difficulty: "常用",
   goal: "用 union 表达多种可能，并通过判断把类型缩小到安全范围。",
   concept: [
-    "A | B 表示值可能是 A，也可能是 B。",
-    "使用 typeof、in、状态字段等判断后，TS 会自动收窄类型。",
-    "React 里常用 union 表达加载、成功、失败等 UI 状态。"
+    "A | B 表示一个值可能是 A，也可能是 B。使用前必须先确认当前到底是哪一种。",
+    "收窄就是通过判断把宽类型变成更具体的类型，例如 typeof value === \"string\" 后才能调用字符串方法。",
+    "对象 union 常用共同字段区分分支，例如 status、type、kind。判断共同字段后，TS 会知道当前分支有哪些独有字段。",
+    "in 判断适合检查对象是否拥有某个字段，例如 \"data\" in response 后才能安全访问 response.data。",
+    "React 里常用 union 表达加载、成功、失败等 UI 状态，避免一个对象里堆满可选字段。"
   ],
   jsThinking:
     "JS 会在一个变量里塞不同形状的数据，再靠运行时判断分支。",
   tsThinking:
     "TS 可以把这些分支变成显式的类型，缺一个状态时编辑器会提醒你。",
   example: `type LoadState =
-  | { status: "loading" }
-  | { status: "success"; data: string[] }
-  | { status: "error"; message: string };
+  | { status: "loading" } // 加载中：没有数据也没有错误信息
+  | { status: "success"; data: string[] } // 成功：这个分支才有 data
+  | { status: "error"; message: string }; // 失败：这个分支才有 message
 
 function renderItems(state: LoadState) {
+  // 判断 status 后，TS 会把 state 收窄成 success 分支
   if (state.status === "success") {
     return state.data.join(", ");
   }
 
+  // 这里 state 被收窄成 error 分支，可以安全读取 message
   if (state.status === "error") {
     return state.message;
   }
 
+  // 剩下的情况就是 loading
   return "Loading...";
 }`,
   exercise: {

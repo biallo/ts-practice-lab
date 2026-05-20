@@ -6,9 +6,11 @@ export const utilityTypesDeepLesson: Lesson = {
   difficulty: "进阶",
   goal: "熟悉项目中高频出现的 Partial、Required、Pick、Omit、ReturnType、Parameters。",
   concept: [
-    "工具类型是 TS 已经帮你写好的类型转换函数。",
-    "Pick 和 Omit 用于从对象类型里选择或排除字段。",
-    "ReturnType 和 Parameters 可以从函数类型里提取返回值和参数列表。"
+    "工具类型是 TS 已经帮你写好的类型转换函数，可以基于已有类型派生新类型。",
+    "Partial 会把字段变成可选，Required 会把可选字段变成必填，常用于表单草稿和完整数据之间的转换。",
+    "Pick 和 Omit 用于从对象类型里选择或排除字段，适合列表预览、创建参数、更新参数。",
+    "ReturnType 和 Parameters 可以从函数类型里提取返回值和参数列表，让函数签名成为类型来源。",
+    "工具类型的价值是减少重复声明：当原始类型变更时，派生类型会自动跟着更新。"
   ],
   jsThinking:
     "JS 里复用对象结构时，经常手动复制字段或靠注释说明差异。",
@@ -20,8 +22,13 @@ export const utilityTypesDeepLesson: Lesson = {
   email: string;
 };
 
+// 列表页只需要 id 和 name
 type UserPreview = Pick<User, "id" | "name">;
+
+// 创建用户时通常还没有后端生成的 id
 type UserForm = Omit<User, "id">;
+
+// 更新用户时允许只提交变化字段
 type UserPatch = Partial<UserForm>;`,
   exercise: {
     prompt: "从 User 类型派生 CreateUserInput 和 UpdateUserInput。",

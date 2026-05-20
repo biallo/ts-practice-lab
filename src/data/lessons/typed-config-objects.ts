@@ -6,9 +6,11 @@ export const typedConfigObjectsLesson: Lesson = {
   difficulty: "进阶",
   goal: "组合 as const、keyof typeof、Record、satisfies 写出安全配置表。",
   concept: [
-    "配置对象通常既是运行时数据，也是类型来源。",
-    "keyof typeof config 可以从对象 key 生成 union。",
-    "satisfies 可以校验配置结构，同时保留字面量类型。"
+    "配置对象通常既是运行时数据，也是类型来源，例如导航、tab、权限表、主题 token。",
+    "keyof typeof config 可以从对象 key 生成 union，让配置项 id 不再手写重复列表。",
+    "as const 会保留配置对象里的字面量信息，适合只读配置和固定枚举数据。",
+    "satisfies 可以校验每个配置项结构，同时保留对象自己的具体 key。",
+    "避免直接把配置对象标成 Record<string, ...>，否则 key 会变宽成 string，后续就失去精确提示。"
   ],
   jsThinking:
     "JS 配置表写起来方便，但 key 写错或漏配置不容易提前发现。",
@@ -20,6 +22,7 @@ export const typedConfigObjectsLesson: Lesson = {
   profile: { label: "个人中心", path: "/profile" }
 } as const;
 
+// 从真实配置对象提取 "home" | "settings" | "profile"
 type TabId = keyof typeof tabConfig;`,
   exercise: {
     prompt: "用 satisfies 校验每个 tab 都有 label 和 path，并推导 TabId。",

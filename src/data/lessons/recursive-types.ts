@@ -6,8 +6,10 @@ export const recursiveTypesLesson: Lesson = {
   difficulty: "进阶",
   goal: "描述树、菜单、评论、多层 JSON 这类自引用数据结构。",
   concept: [
-    "递归类型是在类型定义里引用自己。",
-    "它适合描述树结构、嵌套导航、文件目录、评论回复等数据。",
+    "递归类型是在类型定义里引用自己，用来表达一层数据里还可以包含同样结构的下一层数据。",
+    "它适合描述树结构、嵌套导航、文件目录、评论回复、多级分类等数据。",
+    "对象递归常见写法是 children?: Node[]，表示子节点数组里的每一项仍是 Node。",
+    "递归字段通常是可选的，否则叶子节点也会被迫继续拥有子节点。",
     "写递归工具类型时要有终止条件，否则类型会过深或失控。"
   ],
   jsThinking:
@@ -18,12 +20,13 @@ export const recursiveTypesLesson: Lesson = {
   example: `type TreeNode = {
   id: string;
   label: string;
-  children?: TreeNode[];
+  children?: TreeNode[]; // 子节点仍然是 TreeNode，这就是递归
 };
 
 const menu: TreeNode = {
   id: "docs",
   label: "文档",
+  // 每个 children 元素都必须符合 TreeNode
   children: [{ id: "intro", label: "介绍" }]
 };`,
   exercise: {

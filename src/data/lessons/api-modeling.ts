@@ -6,9 +6,11 @@ export const apiModelingLesson: Lesson = {
   difficulty: "进阶",
   goal: "用泛型描述可复用的 API 响应结构。",
   concept: [
-    "很多接口共享 success、message、data 这类外壳结构。",
-    "ApiResponse<T> 可以让 data 的类型随具体接口变化。",
-    "异步函数常见返回类型是 Promise<ApiResponse<T>>。"
+    "很多接口共享 success、message、data 这类外壳结构，差异主要在 data 的具体形状。",
+    "ApiResponse<T> 把可变化的 data 抽成泛型参数，让同一个响应外壳复用于 User、Product、Order 等模型。",
+    "T 应该代表业务数据本身，不要把整个响应对象再塞进 T，否则会重复嵌套。",
+    "异步函数常见返回类型是 Promise<ApiResponse<T>>，表示 await 之后才能拿到响应结构。",
+    "给 API 函数标返回类型可以让调用方在读取 data 时获得准确字段提示。"
   ],
   jsThinking:
     "JS 里 fetch 后的数据结构靠接口文档和记忆维护。",
@@ -17,7 +19,7 @@ export const apiModelingLesson: Lesson = {
   example: `type ApiResponse<T> = {
   success: boolean;
   message: string;
-  data: T;
+  data: T; // T 只代表真正的业务数据
 };
 
 type User = {
@@ -27,6 +29,7 @@ type User = {
 
 async function fetchUser(): Promise<ApiResponse<User>> {
   const response = await fetch("/api/user");
+  // 真实项目通常还会在这里做运行时校验
   return response.json();
 }`,
   exercise: {

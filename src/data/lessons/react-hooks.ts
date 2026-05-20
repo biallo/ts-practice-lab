@@ -6,9 +6,11 @@ export const reactHooksLesson: Lesson = {
   difficulty: "常用",
   goal: "掌握 useState、表单事件、useRef 的常见 TS 写法。",
   concept: [
-    "useState 初始值足够明确时，TS 可以自动推断。",
-    "初始值是 null 或空数组时，经常需要写泛型。",
-    "表单事件常用 React.ChangeEvent<HTMLInputElement>。"
+    "useState 初始值足够明确时，TS 可以自动推断状态类型，例如 useState(0) 会得到 number。",
+    "初始值是 null 时，通常要写成 useState<User | null>(null)，否则 TS 只知道它现在是 null。",
+    "初始值是空数组时，TS 无法知道元素类型，常见写法是 useState<Todo[]>([])。",
+    "事件处理函数要匹配真实 DOM 元素，input 的 onChange 常用 React.ChangeEvent<HTMLInputElement>。",
+    "状态类型会约束后续 setState，能提前发现把错误形状放进组件状态的问题。"
   ],
   jsThinking:
     "JS 里状态初始值随手写，之后 setState 放什么都可以。",
@@ -19,10 +21,14 @@ export const reactHooksLesson: Lesson = {
   name: string;
 };
 
+// 初始值是 null，所以显式写 User | null
 const [user, setUser] = useState<User | null>(null);
+
+// 空数组无法推断元素类型，所以用泛型指定 string[]
 const [tags, setTags] = useState<string[]>([]);
 
 function handleChange(event: React.ChangeEvent<HTMLInputElement>) {
+  // HTMLInputElement 的 change 事件可以安全读取 target.value
   setTags(event.target.value.split(","));
 }`,
   exercise: {

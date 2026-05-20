@@ -6,25 +6,29 @@ export const discriminatedUnionsLesson: Lesson = {
   difficulty: "进阶",
   goal: "用统一的状态字段建模复杂 UI 和业务状态。",
   concept: [
-    "可辨识联合通常有一个共同字段，比如 status、type、kind。",
-    "每个分支根据这个字段携带不同数据。",
-    "switch 搭配 never 可以检查是否漏处理状态。"
+    "可辨识联合通常有一个共同字段，比如 status、type、kind，这个字段用来区分当前是哪种状态。",
+    "每个分支根据辨识字段携带不同数据：success 有 data，error 有 message，loading 可能什么都没有。",
+    "判断辨识字段后，TS 会把对象收窄到对应分支，独有字段只在正确分支里可访问。",
+    "switch 很适合处理多个状态，配合 never 可以检查是否漏掉新增状态。",
+    "相比把所有字段都设成可选，可辨识联合能表达“某状态一定有某字段”的关系。"
   ],
   jsThinking:
     "JS 状态对象常常混着 data、error、loading，字段是否存在要靠约定。",
   tsThinking:
     "TS 可以让每种状态拥有独立形状，只有对应分支才能访问对应数据。",
   example: `type LoadState<T> =
-  | { status: "idle" }
-  | { status: "loading" }
-  | { status: "success"; data: T }
-  | { status: "error"; message: string };
+  | { status: "idle" } // 初始态
+  | { status: "loading" } // 请求中
+  | { status: "success"; data: T } // 成功态才有 data
+  | { status: "error"; message: string }; // 失败态才有 message
 
 function getMessage(state: LoadState<string[]>) {
   switch (state.status) {
     case "success":
+      // state 已收窄为 success 分支
       return state.data.join(", ");
     case "error":
+      // state 已收窄为 error 分支
       return state.message;
     default:
       return "等待中";

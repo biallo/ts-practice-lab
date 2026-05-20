@@ -6,9 +6,11 @@ export const keyofIndexedAccessLesson: Lesson = {
   difficulty: "进阶",
   goal: "学会从已有对象类型里提取字段名和字段值类型。",
   concept: [
-    "keyof T 会得到对象类型 T 的所有 key 的 union。",
-    "T[K] 可以取出某个字段对应的 value 类型。",
-    "keyof 和泛型结合后，可以写出安全的 getProperty 这类工具函数。"
+    "keyof T 会得到对象类型 T 的所有 key 的 union，例如 keyof User 可能是 \"id\" | \"name\"。",
+    "T[K] 是索引访问类型，可以取出某个字段对应的 value 类型，例如 User[\"name\"] 是 string。",
+    "K extends keyof T 表示 K 必须是 T 真正拥有的字段名，不能随便传任意字符串。",
+    "函数返回 T[K] 时，返回值类型会跟随 key 变化；传 \"id\" 返回 number，传 \"name\" 返回 string。",
+    "keyof 和泛型结合后，可以写出安全的 getProperty、表格列读取、表单字段读取等工具函数。"
   ],
   jsThinking:
     "JS 里 obj[key] 很灵活，但 key 写错只能运行时才发现。",
@@ -20,10 +22,14 @@ export const keyofIndexedAccessLesson: Lesson = {
   email: string;
 };
 
+// 得到 "id" | "name" | "email"
 type UserKey = keyof User;
+
+// 取出 name 字段对应的 value 类型，也就是 string
 type UserName = User["name"];
 
 function getValue<T, K extends keyof T>(item: T, key: K): T[K] {
+  // key 被限制为真实字段，所以 item[key] 是安全的
   return item[key];
 }`,
   exercise: {

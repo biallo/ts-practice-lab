@@ -6,9 +6,11 @@ export const tsconfigStrictLesson: Lesson = {
   difficulty: "进阶",
   goal: "理解 strict 相关配置为什么会影响日常 TS 体验。",
   concept: [
-    "strict 是一组更严格类型检查的总开关。",
-    "noImplicitAny 会阻止参数偷偷变成 any。",
-    "strictNullChecks 会要求你认真处理 null 和 undefined。"
+    "strict 是一组更严格类型检查的总开关，打开后 TS 会更积极地暴露潜在问题。",
+    "noImplicitAny 会阻止参数偷偷变成 any，迫使函数边界写清楚输入类型。",
+    "strictNullChecks 会要求你认真处理 null 和 undefined，不能把可能为空的值当成一定存在。",
+    "strictFunctionTypes、strictBindCallApply 等配置也会让函数类型检查更可靠，但日常最常感知的是 any 和空值。",
+    "新项目建议尽早开启 strict；老项目可以逐步打开并按模块修复。"
   ],
   jsThinking:
     "JS 项目通常靠代码审查和测试发现空值、参数遗漏这类问题。",
@@ -16,8 +18,11 @@ export const tsconfigStrictLesson: Lesson = {
     "TS strict 会把这些隐性风险提前变成编辑器和构建阶段的提醒。",
   example: `{
   "compilerOptions": {
+    // strict 会开启一组更严格的类型检查
     "strict": true,
+    // 参数没有类型时不允许偷偷变成 any
     "noImplicitAny": true,
+    // null 和 undefined 必须被显式处理
     "strictNullChecks": true
   }
 }`,
